@@ -1,5 +1,5 @@
 import {
-  Popover, PopoverTrigger, PopoverContent, PopoverBody,
+  PopoverTrigger, PopoverContent, PopoverBody,
   Modal, ModalContent, ModalCloseButton, useDisclosure,
 } from '@chakra-ui/react';
 import React from 'react';
@@ -7,6 +7,7 @@ import React from 'react';
 import type { MarketplaceAppOverview } from 'types/client/marketplace';
 
 import useIsMobile from 'lib/hooks/useIsMobile';
+import Popover from 'ui/shared/chakra/Popover';
 
 import Content from './MarketplaceAppInfo/Content';
 import TriggerButton from './MarketplaceAppInfo/TriggerButton';
@@ -22,7 +23,7 @@ const MarketplaceAppInfo = ({ data }: Props) => {
   if (isMobile) {
     return (
       <>
-        <TriggerButton onClick={ onToggle }/>
+        <TriggerButton onClick={ onToggle } onlyIcon/>
         <Modal isOpen={ isOpen } onClose={ onClose } size="full">
           <ModalContent>
             <ModalCloseButton/>
@@ -36,7 +37,7 @@ const MarketplaceAppInfo = ({ data }: Props) => {
   return (
     <Popover isOpen={ isOpen } onClose={ onClose } placement="bottom-start" isLazy>
       <PopoverTrigger>
-        <TriggerButton onClick={ onToggle }/>
+        <TriggerButton onClick={ onToggle } isActive={ isOpen }/>
       </PopoverTrigger>
       <PopoverContent w="500px">
         <PopoverBody px={ 6 } py={ 5 }>

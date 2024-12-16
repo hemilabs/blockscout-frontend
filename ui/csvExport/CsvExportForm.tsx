@@ -1,19 +1,21 @@
-import { Button, chakra, Flex } from '@chakra-ui/react';
+import { Alert, Button, chakra, Flex } from '@chakra-ui/react';
 import React from 'react';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm, FormProvider } from 'react-hook-form';
 
 import type { FormFields } from './types';
 import type { CsvExportParams } from 'types/client/address';
 
+import config from 'configs/app';
 import buildUrl from 'lib/api/buildUrl';
 import type { ResourceName } from 'lib/api/resources';
 import dayjs from 'lib/date/dayjs';
 import downloadBlob from 'lib/downloadBlob';
 import useToast from 'lib/hooks/useToast';
+import FormFieldReCaptcha from 'ui/shared/forms/fields/FormFieldReCaptcha';
 
 import CsvExportFormField from './CsvExportFormField';
-import CsvExportFormReCaptcha from './CsvExportFormReCaptcha';
 
 interface Props {
   hash: string;
@@ -21,9 +23,10 @@ interface Props {
   filterType?: CsvExportParams['filterType'] | null;
   filterValue?: CsvExportParams['filterValue'] | null;
   fileNameTemplate: string;
+  exportType: CsvExportParams['type'] | undefined;
 }
 
-const CsvExportForm = ({ hash, resource, filterType, filterValue, fileNameTemplate }: Props) => {
+const CsvExportForm = ({ hash, resource, filterType, filterValue, fileNameTemplate, exportType }: Props) => {
   const formApi = useForm<FormFields>({
     mode: 'onBlur',
     defaultValues: {
@@ -36,13 +39,13 @@ const CsvExportForm = ({ hash, resource, filterType, filterValue, fileNameTempla
 
   const onFormSubmit: SubmitHandler<FormFields> = React.useCallback(async(data) => {
     try {
-      const url = buildUrl(resource, undefined, {
+      const url = buildUrl(resource, { hash } as never, {
         address_id: hash,
-        from_period: data.from,
-        to_period: data.to,
+        from_period: exportType !== 'holders' ? data.from : null,
+        to_period: exportType !== 'holders' ? data.to : null,
         filter_type: filterType,
         filter_value: filterValue,
-        recaptcha_response: data.reCaptcha,
+        recaptcha_v3_response: data.reCaptcha,
       });
 
       const response = await fetch(url, {
@@ -56,11 +59,11 @@ const CsvExportForm = ({ hash, resource, filterType, filterValue, fileNameTempla
       }
 
       const blob = await response.blob();
-      downloadBlob(
-        blob,
-        `${ fileNameTemplate }_${ hash }_${ data.from }_${ data.to }
-        ${ filterType && filterValue ? '_with_filter_type_' + filterType + '_value_' + filterValue : '' }.csv`,
-      );
+      const fileName = exportType === 'holders' ?
+        `${ fileNameTemplate }_${ hash }.csv` :
+        // eslint-disable-next-line max-len
+        `${ fileNameTemplate }_${ hash }_${ data.from }_${ data.to }${ filterType && filterValue ? '_with_filter_type_' + filterType + '_value_' + filterValue : '' }.csv`;
+      downloadBlob(blob, fileName);
 
     } catch (error) {
       toast({
@@ -73,32 +76,43 @@ const CsvExportForm = ({ hash, resource, filterType, filterValue, fileNameTempla
       });
     }
 
-  }, [ fileNameTemplate, hash, resource, filterType, filterValue, toast ]);
+  }, [ resource, hash, exportType, filterType, filterValue, fileNameTemplate, toast ]);
+
+  if (!config.services.reCaptchaV3.siteKey) {
+    return (
+      <Alert status="error">
+        CSV export is not available at the moment since reCaptcha is not configured for this application.
+        Please contact the service maintainer to make necessary changes in the service configuration.
+      </Alert>
+    );
+  }
 
   return (
-    <FormProvider { ...formApi }>
-      <chakra.form
-        noValidate
-        onSubmit={ handleSubmit(onFormSubmit) }
-      >
-        <Flex columnGap={ 5 } rowGap={ 3 } flexDir={{ base: 'column', lg: 'row' }} alignItems={{ base: 'flex-start', lg: 'center' }} flexWrap="wrap">
-          <CsvExportFormField name="from" formApi={ formApi }/>
-          <CsvExportFormField name="to" formApi={ formApi }/>
-          <CsvExportFormReCaptcha formApi={ formApi }/>
-        </Flex>
-        <Button
-          variant="solid"
-          size="lg"
-          type="submit"
-          mt={ 8 }
-          isLoading={ formState.isSubmitting }
-          loadingText="Download"
-          isDisabled={ !formState.isValid }
+    <GoogleReCaptchaProvider reCaptchaKey={ config.services.reCaptchaV3.siteKey }>
+      <FormProvider { ...formApi }>
+        <chakra.form
+          noValidate
+          onSubmit={ handleSubmit(onFormSubmit) }
         >
-          Download
-        </Button>
-      </chakra.form>
-    </FormProvider>
+          <Flex columnGap={ 5 } rowGap={ 3 } flexDir={{ base: 'column', lg: 'row' }} alignItems={{ base: 'flex-start', lg: 'center' }} flexWrap="wrap">
+            { exportType !== 'holders' && <CsvExportFormField name="from" formApi={ formApi }/> }
+            { exportType !== 'holders' && <CsvExportFormField name="to" formApi={ formApi }/> }
+            <FormFieldReCaptcha/>
+          </Flex>
+          <Button
+            variant="solid"
+            size="lg"
+            type="submit"
+            mt={ 8 }
+            isLoading={ formState.isSubmitting }
+            loadingText="Download"
+            isDisabled={ Boolean(formState.errors.from || formState.errors.to) }
+          >
+            Download
+          </Button>
+        </chakra.form>
+      </FormProvider>
+    </GoogleReCaptchaProvider>
   );
 };
 

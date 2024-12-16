@@ -81,8 +81,17 @@ jobs:
         with:
             platforms: linux/amd64,linux/arm64/v8
 
+    sync_envs_docs:
+        name: Sync ENV variables docs
+        uses: './.github/workflows/sync-envs-docs.yml'
+        needs: publish_image
+        secrets: inherit
+
+    # Temporary disable this step because it is broken
+    # There is an issue with building web3modal deps
     upload_source_maps:
         name: Upload source maps to Sentry
+        if: false
         needs: publish_image
         uses: './.github/workflows/upload-source-maps.yml'
         secrets: inherit

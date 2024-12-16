@@ -1,7 +1,6 @@
 import {
   Image,
   Button,
-  Popover,
   PopoverTrigger,
   PopoverBody,
   PopoverContent,
@@ -18,8 +17,10 @@ import type { NetworkExplorer as TNetworkExplorer } from 'types/networks';
 
 import config from 'configs/app';
 import stripTrailingSlash from 'lib/stripTrailingSlash';
+import Popover from 'ui/shared/chakra/Popover';
 import IconSvg from 'ui/shared/IconSvg';
-import LinkExternal from 'ui/shared/LinkExternal';
+import LinkExternal from 'ui/shared/links/LinkExternal';
+import PopoverTriggerTooltip from 'ui/shared/PopoverTriggerTooltip';
 
 interface Props {
   className?: string;
@@ -55,26 +56,28 @@ const NetworkExplorers = ({ className, type, pathParam }: Props) => {
   return (
     <Popover isOpen={ isOpen } onClose={ onClose } placement="bottom-start" isLazy>
       <PopoverTrigger>
-        <Button
-          className={ className }
-          size="sm"
-          variant="outline"
-          colorScheme="gray"
-          onClick={ onToggle }
-          aria-label="Verify in other explorers"
-          fontWeight={ 500 }
-          px={ 2 }
-          h="32px"
-          flexShrink={ 0 }
-        >
-          <IconSvg name="explorer" boxSize={ 5 }/>
-          <Show above="xl">
-            <chakra.span ml={ 1 }>{ explorersLinks.length } Explorer{ explorersLinks.length > 1 ? 's' : '' }</chakra.span>
-          </Show>
-          <Hide above="xl">
-            <chakra.span ml={ 1 }>{ explorersLinks.length }</chakra.span>
-          </Hide>
-        </Button>
+        <PopoverTriggerTooltip label="Verify with other explorers" className={ className }>
+          <Button
+            size="sm"
+            variant="outline"
+            colorScheme="gray"
+            onClick={ onToggle }
+            isActive={ isOpen }
+            aria-label="Verify in other explorers"
+            fontWeight={ 500 }
+            px={ 2 }
+            h="32px"
+            flexShrink={ 0 }
+          >
+            <IconSvg name="explorer" boxSize={ 5 }/>
+            <Show above="xl">
+              <chakra.span ml={ 1 }>{ explorersLinks.length } Explorer{ explorersLinks.length > 1 ? 's' : '' }</chakra.span>
+            </Show>
+            <Hide above="xl">
+              <chakra.span ml={ 1 }>{ explorersLinks.length }</chakra.span>
+            </Hide>
+          </Button>
+        </PopoverTriggerTooltip>
       </PopoverTrigger>
       <PopoverContent w="auto">
         <PopoverBody >

@@ -7,6 +7,7 @@ import type {
   SearchResult,
   SearchResultUserOp,
   SearchResultBlob,
+  SearchResultDomain,
 } from 'types/api/search';
 
 export const token1: SearchResultToken = {
@@ -95,6 +96,15 @@ export const contract1: SearchResultAddressOrContract = {
   url: '/address/0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
 };
 
+export const contract2: SearchResultAddressOrContract = {
+  address: '0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
+  name: 'Super utko',
+  type: 'contract' as const,
+  is_smart_contract_verified: true,
+  certified: true,
+  url: '/address/0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
+};
+
 export const label1: SearchResultLabel = {
   address: '0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
   name: 'utko',
@@ -104,7 +114,7 @@ export const label1: SearchResultLabel = {
 };
 
 export const tx1: SearchResultTx = {
-  tx_hash: '0x349d4025d03c6faec117ee10ac0bce7c7a805dd2cbff7a9f101304d9a8a525dd',
+  transaction_hash: '0x349d4025d03c6faec117ee10ac0bce7c7a805dd2cbff7a9f101304d9a8a525dd',
   type: 'transaction' as const,
   timestamp: '2022-12-11T17:55:20Z',
   url: '/tx/0x349d4025d03c6faec117ee10ac0bce7c7a805dd2cbff7a9f101304d9a8a525dd',
@@ -123,6 +133,20 @@ export const blob1: SearchResultBlob = {
   timestamp: null,
 };
 
+export const domain1: SearchResultDomain = {
+  address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+  ens_info: {
+    address_hash: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+    expiry_date: '2039-09-01T07:36:18.000Z',
+    name: 'vitalik.eth',
+    names_count: 1,
+  },
+  is_smart_contract_verified: false,
+  name: null,
+  type: 'ens_domain',
+  url: '/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+};
+
 export const baseResponse: SearchResult = {
   items: [
     token1,
@@ -132,6 +156,7 @@ export const baseResponse: SearchResult = {
     contract1,
     tx1,
     blob1,
+    domain1,
   ],
   next_page_params: null,
 };

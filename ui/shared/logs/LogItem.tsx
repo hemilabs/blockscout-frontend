@@ -23,7 +23,7 @@ const RowHeader = ({ children, isLoading }: { children: React.ReactNode; isLoadi
   </GridItem>
 );
 
-const LogItem = ({ address, index, topics, data, decoded, type, tx_hash: txHash, isLoading }: Props) => {
+const LogItem = ({ address, index, topics, data, decoded, type, transaction_hash: txHash, isLoading }: Props) => {
 
   const borderColor = useColorModeValue('blackAlpha.200', 'whiteAlpha.200');
   const dataBgColor = useColorModeValue('blackAlpha.50', 'whiteAlpha.50');
@@ -53,7 +53,7 @@ const LogItem = ({ address, index, topics, data, decoded, type, tx_hash: txHash,
       ) }
       { hasTxInfo ? <RowHeader isLoading={ isLoading }>Transaction</RowHeader> : <RowHeader isLoading={ isLoading }>Address</RowHeader> }
       <GridItem display="flex" alignItems="center">
-        { type === 'address' ? (
+        { type === 'address' && txHash ? (
           <TxEntity
             hash={ txHash }
             isLoading={ isLoading }
@@ -74,7 +74,7 @@ const LogItem = ({ address, index, topics, data, decoded, type, tx_hash: txHash,
         </Tooltip> */ }
         <Skeleton isLoaded={ !isLoading } ml="auto" borderRadius="base">
           <Tooltip label="Log index">
-            <Button variant="outline" colorScheme="gray" isActive size="sm" fontWeight={ 400 }>
+            <Button variant="outline" colorScheme="gray" data-selected="true" size="sm" fontWeight={ 400 }>
               { index }
             </Button>
           </Tooltip>

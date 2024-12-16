@@ -1,6 +1,6 @@
 export interface ChartTransactionItem {
   date: string;
-  tx_count: number | null;
+  transaction_count: number | null;
 }
 
 export interface ChartMarketItem {
@@ -15,6 +15,11 @@ export interface ChartTransactionResponse {
 }
 
 export interface ChartMarketResponse {
+  available_supply: string;
+  chart_data: Array<ChartMarketItem>;
+}
+
+export interface ChartSecondaryCoinPriceResponse {
   available_supply: string;
   chart_data: Array<ChartMarketItem>;
 }

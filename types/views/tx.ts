@@ -7,6 +7,8 @@ export const TX_FIELDS_IDS = [
   'tx_fee',
   'gas_fees',
   'burnt_fees',
+  'L1_status',
+  'batch',
 ] as const;
 
 export type TxFieldsId = ArrayElement<typeof TX_FIELDS_IDS>;
@@ -16,9 +18,3 @@ export const TX_ADDITIONAL_FIELDS_IDS = [
 ] as const;
 
 export type TxAdditionalFieldsId = ArrayElement<typeof TX_ADDITIONAL_FIELDS_IDS>;
-
-export const TX_VIEWS_IDS = [
-  'blob_txs',
-] as const;
-
-export type TxViewId = ArrayElement<typeof TX_VIEWS_IDS>;

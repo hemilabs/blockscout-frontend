@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.husky/**'
+      - '.vscode/**'
+      - 'docs/**'
+      - 'jest/**'
+      - 'mocks/**'
+      - 'playwright/**'
+      - 'stubs/**'
+      - 'tools/**'
   workflow_dispatch:
 
 concurrency:
@@ -15,37 +25,3 @@ jobs:
     name: Publish Docker image
     uses: './.github/workflows/publish-image.yml'
     secrets: inherit
-
-  deploy_main:
-    name: Deploy frontend
-    needs: publish_image
-    uses: blockscout/blockscout-ci-cd/.github/workflows/deploy_helmfile.yaml@master
-    with:
-      appName: front
-      globalEnv: main
-      helmfileDir: deploy
-      kubeConfigSecret: ci/data/dev/kubeconfig/k8s-dev
-      vaultRole: ci-dev
-    secrets: inherit
-    # This job will deploy the newly created image version to k8s, but Hemi is
-    # not using that setup at the moment. Disabling it until the pipeline is
-    # revised and adapted.
-    if: false
-    permissions: write-all
-
-  deploy_l2:
-    name: Deploy frontend (L2)
-    needs: publish_image
-    uses: blockscout/blockscout-ci-cd/.github/workflows/deploy_helmfile.yaml@master
-    with:
-      appName: l2-optimism-goerli
-      globalEnv: optimism-goerli
-      helmfileDir: deploy
-      kubeConfigSecret: ci/data/dev/kubeconfig/k8s-dev
-      vaultRole: ci-dev
-    secrets: inherit
-    # This job will deploy the newly created image version to k8s, but Hemi is
-    # not using that setup at the moment. Disabling it until the pipeline is
-    # revised and adapted.
-    if: false
-    permissions: write-all

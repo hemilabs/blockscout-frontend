@@ -32,6 +32,7 @@ const GasTrackerPriceSnippet = ({ data, type, isLoading }: Props) => {
     average: useColorModeValue('gray.50', 'whiteAlpha.200'),
     slow: useColorModeValue('gray.50', 'whiteAlpha.200'),
   };
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.300');
 
   return (
     <Box
@@ -41,6 +42,11 @@ const GasTrackerPriceSnippet = ({ data, type, isLoading }: Props) => {
       py={ 6 }
       w={{ lg: 'calc(100% / 3)' }}
       bgColor={ bgColors[type] }
+      _notLast={{
+        borderColor: borderColor,
+        borderRightWidth: { lg: '2px' },
+        borderBottomWidth: { base: '2px', lg: '0' },
+      }}
     >
       <Skeleton textStyle="h3" isLoaded={ !isLoading } w="fit-content">{ TITLES[type] }</Skeleton>
       <Flex columnGap={ 3 } alignItems="center" mt={ 3 }>
@@ -50,14 +56,14 @@ const GasTrackerPriceSnippet = ({ data, type, isLoading }: Props) => {
         </Skeleton>
       </Flex>
       <Skeleton isLoaded={ !isLoading } fontSize="sm" color="text_secondary" mt={ 3 } w="fit-content">
-        { data.price && data.fiat_price && <GasPrice data={ data } prefix={ `${ asymp } ` } unitMode="secondary"/> }
+        { data.price !== null && data.fiat_price !== null && <GasPrice data={ data } prefix={ `${ asymp } ` } unitMode="secondary"/> }
         <span> per transaction</span>
-        { data.time && <span> / { (data.time / SECOND).toLocaleString(undefined, { maximumFractionDigits: 1 }) }s</span> }
+        { typeof data.time === 'number' && data.time > 0 && <span> / { (data.time / SECOND).toLocaleString(undefined, { maximumFractionDigits: 1 }) }s</span> }
       </Skeleton>
       <Skeleton isLoaded={ !isLoading } fontSize="sm" color="text_secondary" mt={ 2 } w="fit-content" whiteSpace="pre">
-        { data.base_fee && <span>Base { data.base_fee.toLocaleString(undefined, { maximumFractionDigits: 0 }) }</span> }
-        { data.base_fee && data.priority_fee && <span> / </span> }
-        { data.priority_fee && <span>Priority { data.priority_fee.toLocaleString(undefined, { maximumFractionDigits: 0 }) }</span> }
+        { typeof data.base_fee === 'number' && <span>Base { data.base_fee.toLocaleString(undefined, { maximumFractionDigits: 0 }) }</span> }
+        { typeof data.base_fee === 'number' && typeof data.priority_fee === 'number' && <span> / </span> }
+        { typeof data.priority_fee === 'number' && <span>Priority { data.priority_fee.toLocaleString(undefined, { maximumFractionDigits: 0 }) }</span> }
       </Skeleton>
     </Box>
   );

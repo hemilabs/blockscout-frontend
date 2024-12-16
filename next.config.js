@@ -10,6 +10,7 @@ const headers = require('./nextjs/headers');
 const redirects = require('./nextjs/redirects');
 const rewrites = require('./nextjs/rewrites');
 
+/** @type {import('next').NextConfig} */
 const moduleExports = {
   transpilePackages: [
     'react-syntax-highlighter',
@@ -45,7 +46,10 @@ const moduleExports = {
   output: 'standalone',
   productionBrowserSourceMaps: true,
   experimental: {
-    instrumentationHook: true,
+    staleTimes: {
+      dynamic: 30,
+      'static': 180,
+    },
   },
 };
 

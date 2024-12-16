@@ -13,12 +13,16 @@ export function ad(): CspDev.DirectiveDescriptor {
       '*.coinzilla.com',
       'https://request-global.czilladx.com',
 
+      // adbutler
+      'servedbyadbutler.com',
+
       // slise
       '*.slise.xyz',
 
       // hype
       'api.hypelab.com',
       '*.ixncdn.com',
+      '*.cloudfront.net',
 
       //getit
       'v1.getittech.io',
@@ -35,7 +39,8 @@ export function ad(): CspDev.DirectiveDescriptor {
       // adbutler
       'servedbyadbutler.com',
       `'sha256-${ Base64.stringify(sha256(connectAdbutler)) }'`,
-      `'sha256-${ Base64.stringify(sha256(placeAd ?? '')) }'`,
+      `'sha256-${ Base64.stringify(sha256(placeAd(undefined) ?? '')) }'`,
+      `'sha256-${ Base64.stringify(sha256(placeAd('mobile') ?? '')) }'`,
 
       // slise
       '*.slise.xyz',

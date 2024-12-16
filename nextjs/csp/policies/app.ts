@@ -30,9 +30,19 @@ const getCspReportUrl = () => {
   }
 };
 
-export function app(): CspDev.DirectiveDescriptor {
-  const marketplaceFeaturePayload = getFeaturePayload(config.features.marketplace);
+const externalFontsDomains = (() => {
+  try {
+    return [
+      config.UI.fonts.heading?.url,
+      config.UI.fonts.body?.url,
+    ]
+      .filter(Boolean)
+      .map((urlString) => new URL(urlString))
+      .map((url) => url.hostname);
+  } catch (error) {}
+})();
 
+export function app(): CspDev.DirectiveDescriptor {
   return {
     'default-src': [
       // KEY_WORDS.NONE,
@@ -56,7 +66,8 @@ export function app(): CspDev.DirectiveDescriptor {
       getFeaturePayload(config.features.verifiedTokens)?.api.endpoint,
       getFeaturePayload(config.features.addressVerification)?.api.endpoint,
       getFeaturePayload(config.features.nameService)?.api.endpoint,
-      marketplaceFeaturePayload && 'api' in marketplaceFeaturePayload ? marketplaceFeaturePayload.api.endpoint : '',
+      getFeaturePayload(config.features.addressMetadata)?.api.endpoint,
+      getFeaturePayload(config.features.rewards)?.api.endpoint,
 
       // chain RPC server
       config.chain.rpcUrl,
@@ -74,8 +85,9 @@ export function app(): CspDev.DirectiveDescriptor {
       // https://github.com/vercel/next.js/issues/14221#issuecomment-657258278
       config.app.isDev ? KEY_WORDS.UNSAFE_EVAL : '',
 
-      // hash of ColorModeScript
+      // hash of ColorModeScript: system + dark
       '\'sha256-e7MRMmTzLsLQvIy1iizO1lXf7VWYoQ6ysj5fuUzvRwE=\'',
+      '\'sha256-9A7qFFHmxdWjZMQmfzYD2XWaNHLu1ZmQB0Ds4Go764k=\'',
     ],
 
     'style-src': [
@@ -117,6 +129,7 @@ export function app(): CspDev.DirectiveDescriptor {
     'font-src': [
       KEY_WORDS.DATA,
       ...MAIN_DOMAINS,
+      ...(externalFontsDomains || []),
     ],
 
     'object-src': [
@@ -130,6 +143,10 @@ export function app(): CspDev.DirectiveDescriptor {
     'frame-src': [
       // could be a marketplace app or NFT media (html-page)
       '*',
+    ],
+
+    'frame-ancestors': [
+      KEY_WORDS.SELF,
     ],
 
     ...((() => {

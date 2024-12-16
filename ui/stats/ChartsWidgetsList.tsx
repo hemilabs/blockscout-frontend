@@ -1,7 +1,7 @@
 import { Box, Grid, Heading, List, ListItem, Skeleton } from '@chakra-ui/react';
 import React, { useCallback, useState } from 'react';
 
-import type { StatsChartsSection } from 'types/api/stats';
+import type * as stats from '@blockscout/stats-types';
 import type { StatsIntervalIds } from 'types/client/stats';
 
 import useApiQuery from 'lib/api/useApiQuery';
@@ -15,16 +15,26 @@ import ChartWidgetContainer from './ChartWidgetContainer';
 
 type Props = {
   filterQuery: string;
+  initialFilterQuery: string;
   isError: boolean;
   isPlaceholderData: boolean;
-  charts?: Array<StatsChartsSection>;
+  charts?: Array<stats.LineChartSection>;
   interval: StatsIntervalIds;
-}
+};
 
-const ChartsWidgetsList = ({ filterQuery, isError, isPlaceholderData, charts, interval }: Props) => {
+const ChartsWidgetsList = ({ filterQuery, isError, isPlaceholderData, charts, interval, initialFilterQuery }: Props) => {
   const [ isSomeChartLoadingError, setIsSomeChartLoadingError ] = useState(false);
   const isAnyChartDisplayed = charts?.some((section) => section.charts.length > 0);
   const isEmptyChartList = Boolean(filterQuery) && !isAnyChartDisplayed;
+  const sectionRef = React.useRef<HTMLUListElement | null>(null);
+
+  const shouldScrollToSection = Boolean(initialFilterQuery);
+
+  React.useEffect(() => {
+    if (shouldScrollToSection) {
+      sectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [ shouldScrollToSection ]);
 
   const homeStatsQuery = useApiQuery('stats', {
     queryOptions: {
@@ -50,7 +60,7 @@ const ChartsWidgetsList = ({ filterQuery, isError, isPlaceholderData, charts, in
         <ChartsLoadingErrorAlert/>
       ) }
 
-      <List>
+      <List ref={ sectionRef }>
         {
           charts?.map((section) => (
             <ListItem
@@ -61,12 +71,12 @@ const ChartsWidgetsList = ({ filterQuery, isError, isPlaceholderData, charts, in
               }}
             >
               <Skeleton isLoaded={ !isPlaceholderData } mb={ 4 } display="inline-flex" alignItems="center" columnGap={ 2 } id={ section.id }>
-                <Heading size="md" >
+                <Heading size="md" id={ section.id }>
                   { section.title }
                 </Heading>
                 { section.id === 'gas' && homeStatsQuery.data && homeStatsQuery.data.gas_prices && (
                   <GasInfoTooltip data={ homeStatsQuery.data } dataUpdatedAt={ homeStatsQuery.dataUpdatedAt }>
-                    <IconSvg name="info" boxSize={ 5 } display="block" cursor="pointer" _hover={{ color: 'link_hovered' }}/>
+                    <IconSvg name="info" boxSize={ 5 } display="block" cursor="pointer" color="icon_info" _hover={{ color: 'link_hovered' }}/>
                   </GasInfoTooltip>
                 ) }
               </Skeleton>
@@ -85,6 +95,7 @@ const ChartsWidgetsList = ({ filterQuery, isError, isPlaceholderData, charts, in
                     units={ chart.units || undefined }
                     isPlaceholderData={ isPlaceholderData }
                     onLoadingError={ handleChartLoadingError }
+                    href={{ pathname: '/stats/[id]', query: { id: chart.id } }}
                   />
                 )) }
               </Grid>

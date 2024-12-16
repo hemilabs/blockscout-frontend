@@ -7,7 +7,7 @@ import { route } from 'nextjs-routes';
 
 import useIsMobile from 'lib/hooks/useIsMobile';
 import AddressEntity from 'ui/shared/entities/address/AddressEntity';
-import LinkInternal from 'ui/shared/LinkInternal';
+import LinkInternal from 'ui/shared/links/LinkInternal';
 import NftMedia from 'ui/shared/nft/NftMedia';
 import TruncatedTextTooltip from 'ui/shared/TruncatedTextTooltip';
 
@@ -23,6 +23,7 @@ const TokenInventoryItem = ({ item, token, isLoading }: Props) => {
       animationUrl={ item.animation_url }
       imageUrl={ item.image_url }
       isLoading={ isLoading }
+      autoplayVideo={ false }
     />
   );
 

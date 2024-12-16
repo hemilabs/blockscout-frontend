@@ -6,7 +6,7 @@ import type { AddressTag } from 'types/api/account';
 import { PAGE_TYPE_DICT } from 'lib/mixpanel/getPageType';
 import { PRIVATE_TAG_ADDRESS } from 'stubs/account';
 import AccountPageDescription from 'ui/shared/AccountPageDescription';
-import ActionBar from 'ui/shared/ActionBar';
+import ActionBar, { ACTION_BAR_HEIGHT_DESKTOP } from 'ui/shared/ActionBar';
 import DataListDisplay from 'ui/shared/DataListDisplay';
 import Pagination from 'ui/shared/pagination/Pagination';
 import useQueryWithPages from 'ui/shared/pagination/useQueryWithPages';
@@ -61,7 +61,7 @@ const PrivateAddressTags = () => {
         { addressTagsData?.items.map((item: AddressTag, index: number) => (
           <AddressTagListItem
             item={ item }
-            key={ item.id + (isPlaceholderData ? index : '') }
+            key={ item.id + (isPlaceholderData ? String(index) : '') }
             onDeleteClick={ onDeleteClick }
             onEditClick={ onEditClick }
             isLoading={ isPlaceholderData }
@@ -74,7 +74,7 @@ const PrivateAddressTags = () => {
           data={ addressTagsData?.items }
           onDeleteClick={ onDeleteClick }
           onEditClick={ onEditClick }
-          top={ pagination.isVisible ? 80 : 0 }
+          top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 }
         />
       </Box>
     </>
@@ -104,7 +104,7 @@ const PrivateAddressTags = () => {
           size="lg"
           onClick={ addressModalProps.onOpen }
         >
-            Add address tag
+          Add address tag
         </Button>
       </Skeleton>
       <AddressModal

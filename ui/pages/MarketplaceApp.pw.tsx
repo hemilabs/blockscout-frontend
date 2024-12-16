@@ -1,16 +1,15 @@
 import { Flex } from '@chakra-ui/react';
-import { test as base, expect, devices } from '@playwright/experimental-ct-react';
 import React from 'react';
+import { numberToHex } from 'viem';
 
-import { buildExternalAssetFilePath } from 'configs/app/utils';
+import config from 'configs/app';
 import { apps as appsMock } from 'mocks/apps/apps';
-import contextWithEnvs from 'playwright/fixtures/contextWithEnvs';
-import TestApp from 'playwright/TestApp';
-import * as app from 'playwright/utils/app';
+import { ratings as ratingsMock } from 'mocks/apps/ratings';
+import { securityReports as securityReportsMock } from 'mocks/apps/securityReports';
+import type { TestFnArgs } from 'playwright/lib';
+import { test, expect, devices } from 'playwright/lib';
 
 import MarketplaceApp from './MarketplaceApp';
-
-const MARKETPLACE_CONFIG_URL = app.url + buildExternalAssetFilePath('NEXT_PUBLIC_MARKETPLACE_CONFIG_URL', 'https://marketplace-config.json') || '';
 
 const hooksConfig = {
   router: {
@@ -19,38 +18,38 @@ const hooksConfig = {
   },
 };
 
-const testFn: Parameters<typeof test>[1] = async({ mount, page }) => {
-  await page.route(MARKETPLACE_CONFIG_URL, (route) => route.fulfill({
+const MARKETPLACE_CONFIG_URL = 'http://localhost:4000/marketplace-config.json';
+const MARKETPLACE_SECURITY_REPORTS_URL = 'http://localhost:4000/marketplace-security-reports.json';
+
+const testFn = async({ render, mockConfigResponse, mockAssetResponse, mockEnvs, mockRpcResponse, page }: TestFnArgs) => {
+  await mockEnvs([
+    [ 'NEXT_PUBLIC_MARKETPLACE_ENABLED', 'true' ],
+    [ 'NEXT_PUBLIC_MARKETPLACE_CONFIG_URL', MARKETPLACE_CONFIG_URL ],
+    [ 'NEXT_PUBLIC_MARKETPLACE_SECURITY_REPORTS_URL', MARKETPLACE_SECURITY_REPORTS_URL ],
+    [ 'NEXT_PUBLIC_MARKETPLACE_RATING_AIRTABLE_API_KEY', 'test' ],
+    [ 'NEXT_PUBLIC_MARKETPLACE_RATING_AIRTABLE_BASE_ID', 'test' ],
+  ]);
+  await mockConfigResponse('NEXT_PUBLIC_MARKETPLACE_CONFIG_URL', MARKETPLACE_CONFIG_URL, JSON.stringify(appsMock));
+  await mockConfigResponse('NEXT_PUBLIC_MARKETPLACE_SECURITY_REPORTS_URL', MARKETPLACE_SECURITY_REPORTS_URL, JSON.stringify(securityReportsMock));
+  await mockAssetResponse(appsMock[0].url, './mocks/apps/app.html');
+  await mockRpcResponse({
+    Method: 'eth_chainId',
+    ReturnType: numberToHex(Number(config.chain.id)),
+  });
+  await page.route('https://api.airtable.com/v0/test/apps_ratings?fields%5B%5D=appId&fields%5B%5D=rating&fields%5B%5D=count', (route) => route.fulfill({
     status: 200,
-    body: JSON.stringify(appsMock),
+    body: JSON.stringify(ratingsMock),
   }));
 
-  await page.route(appsMock[0].url, (route) =>
-    route.fulfill({
-      status: 200,
-      path: './mocks/apps/app.html',
-    }),
-  );
-
-  const component = await mount(
-    <TestApp>
-      { /* added Flex as a Layout because the iframe has negative margins */ }
-      <Flex flexDirection="column" mx={{ base: 4, lg: 6 }}>
-        <MarketplaceApp/>
-      </Flex>
-    </TestApp>,
+  const component = await render(
+    <Flex flexDirection="column" mx={{ base: 4, lg: 6 }} h="100vh">
+      <MarketplaceApp/>
+    </Flex>,
     { hooksConfig },
   );
 
   await expect(component).toHaveScreenshot();
 };
-
-const test = base.extend({
-  context: contextWithEnvs([
-    { name: 'NEXT_PUBLIC_MARKETPLACE_CONFIG_URL', value: MARKETPLACE_CONFIG_URL },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ]) as any,
-});
 
 test('base view +@dark-mode', testFn);
 
