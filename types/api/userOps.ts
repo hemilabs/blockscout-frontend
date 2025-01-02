@@ -1,4 +1,5 @@
 import type { AddressParamBasic } from './addressParams';
+import type { DecodedInput } from './decodedInput';
 
 export type UserOpsItem = {
   hash: string;
@@ -8,7 +9,7 @@ export type UserOpsItem = {
   timestamp: string;
   status: boolean;
   fee: string;
-}
+};
 
 export type UserOpsResponse = {
   items: Array<UserOpsItem>;
@@ -16,7 +17,7 @@ export type UserOpsResponse = {
     page_token: string;
     page_size: number;
   } | null;
-}
+};
 
 export type UserOpSponsorType = 'paymaster_hybrid' | 'paymaster_sponsor' | 'wallet_balance' | 'wallet_deposit';
 
@@ -46,6 +47,9 @@ export type UserOp = {
   signature: string;
   nonce: string;
   call_data: string;
+  decoded_call_data: DecodedInput | null;
+  execute_call_data: string | null;
+  decoded_execute_call_data: DecodedInput | null;
   user_logs_start_index: number;
   user_logs_count: number;
   raw: {
@@ -65,13 +69,13 @@ export type UserOp = {
   };
   gas_price: string;
   gas_used: string;
-}
+};
 
 export type UserOpsFilters = {
   transaction_hash?: string;
   sender?: string;
-}
+};
 
 export type UserOpsAccount = {
   total_ops: number;
-}
+};

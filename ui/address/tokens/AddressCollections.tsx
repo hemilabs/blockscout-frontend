@@ -8,7 +8,7 @@ import { apos } from 'lib/html-entities';
 import ActionBar from 'ui/shared/ActionBar';
 import DataListDisplay from 'ui/shared/DataListDisplay';
 import TokenEntity from 'ui/shared/entities/token/TokenEntity';
-import LinkInternal from 'ui/shared/LinkInternal';
+import LinkInternal from 'ui/shared/links/LinkInternal';
 import NftFallback from 'ui/shared/nft/NftFallback';
 import Pagination from 'ui/shared/pagination/Pagination';
 import type { QueryWithPagesResult } from 'ui/shared/pagination/useQueryWithPages';
@@ -20,7 +20,7 @@ type Props = {
   collectionsQuery: QueryWithPagesResult<'address_collections'>;
   address: string;
   hasActiveFilters: boolean;
-}
+};
 
 const AddressCollections = ({ collectionsQuery, address, hasActiveFilters }: Props) => {
   const isMobile = useIsMobile();
@@ -64,7 +64,7 @@ const AddressCollections = ({ collectionsQuery, address, hasActiveFilters }: Pro
         </Flex>
         <Grid
           w="100%"
-          mb={ 7 }
+          mb={ 6 }
           columnGap={{ base: 3, lg: 6 }}
           rowGap={{ base: 3, lg: 6 }}
           gridTemplateColumns={{ base: 'repeat(2, calc((100% - 12px)/2))', lg: 'repeat(auto-fill, minmax(210px, 1fr))' }}

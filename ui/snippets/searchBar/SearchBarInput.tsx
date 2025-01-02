@@ -1,4 +1,4 @@
-import { InputGroup, Input, InputLeftElement, chakra, useColorModeValue, forwardRef, InputRightElement } from '@chakra-ui/react';
+import { InputGroup, Input, InputLeftElement, chakra, useColorModeValue, forwardRef, InputRightElement, Center } from '@chakra-ui/react';
 import throttle from 'lodash/throttle';
 import React from 'react';
 import type { ChangeEvent, FormEvent, FocusEvent } from 'react';
@@ -62,8 +62,68 @@ const SearchBarInput = (
     };
   }, [ isMobile, handleScroll ]);
 
+  const handleKeyPress = React.useCallback((event: KeyboardEvent) => {
+    if (isMobile) {
+      return;
+    }
+
+    switch (event.key) {
+      case '/': {
+        if ([ 'INPUT', 'TEXTAREA' ].includes((event.target as HTMLElement).tagName)) {
+          break;
+        }
+
+        if (!isSuggestOpen) {
+          event.preventDefault();
+          innerRef.current?.querySelector('input')?.focus();
+          onFocus?.();
+        }
+        break;
+      }
+      case 'Escape': {
+        if (isSuggestOpen) {
+          innerRef.current?.querySelector('input')?.blur();
+          onHide?.();
+        }
+        break;
+      }
+    }
+  }, [ isMobile, isSuggestOpen, onFocus, onHide ]);
+
+  React.useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [ handleKeyPress ]);
+
   const bgColor = useColorModeValue('white', 'black');
   const transformMobile = scrollDirection !== 'down' ? 'translateY(0)' : 'translateY(-100%)';
+
+  const rightElement = (() => {
+    if (value) {
+      return <ClearButton onClick={ onClear }/>;
+    }
+
+    if (isMobile) {
+      return null;
+    }
+
+    return (
+      <Center
+        boxSize="20px"
+        my="2px"
+        mr={{ base: 1, lg: isHomepage ? 2 : 1 }}
+        borderRadius="sm"
+        borderWidth="1px"
+        borderColor="gray.400"
+        color="gray.400"
+        display={{ base: 'none', lg: 'flex' }}
+      >
+        /
+      </Center>
+    );
+  })();
 
   return (
     <chakra.form
@@ -79,7 +139,7 @@ const SearchBarInput = (
       top={{ base: isHomepage ? 0 : 55, lg: 0 }}
       left="0"
       zIndex={{ base: isHomepage ? 'auto' : '-1', lg: isSuggestOpen ? 'popover' : 'auto' }}
-      paddingX={{ base: isHomepage ? 0 : 4, lg: 0 }}
+      paddingX={{ base: isHomepage ? 0 : 3, lg: 0 }}
       paddingTop={{ base: isHomepage ? 0 : 1, lg: 0 }}
       paddingBottom={{ base: isHomepage ? 0 : 2, lg: 0 }}
       boxShadow={ scrollDirection !== 'down' && isSticky ? 'md' : 'none' }
@@ -88,7 +148,7 @@ const SearchBarInput = (
       transitionDuration="normal"
       transitionTimingFunction="ease"
     >
-      <InputGroup size={{ base: isHomepage ? 'md' : 'sm', lg: 'md' }}>
+      <InputGroup size={{ base: 'sm', lg: isHomepage ? 'sm_md' : 'sm' }}>
         <InputLeftElement w={{ base: isHomepage ? 6 : 4, lg: 6 }} ml={{ base: isHomepage ? 4 : 3, lg: 4 }} h="100%">
           <IconSvg name="search" boxSize={{ base: isHomepage ? 6 : 4, lg: 6 }} color={ useColorModeValue('blackAlpha.600', 'whiteAlpha.600') }/>
         </InputLeftElement>
@@ -111,11 +171,9 @@ const SearchBarInput = (
           color={ useColorModeValue('black', 'white') }
           value={ value }
         />
-        { value && (
-          <InputRightElement top={{ base: isHomepage ? '18px' : 2, lg: '18px' }} right={ 2 }>
-            <ClearButton onClick={ onClear }/>
-          </InputRightElement>
-        ) }
+        <InputRightElement top={{ base: 2, lg: isHomepage ? 3 : 2 }} right={ 2 }>
+          { rightElement }
+        </InputRightElement>
       </InputGroup>
     </chakra.form>
   );

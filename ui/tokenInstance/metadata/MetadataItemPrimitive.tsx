@@ -3,7 +3,7 @@ import React from 'react';
 import type { Primitive } from 'react-hook-form';
 
 import urlParser from 'lib/token/metadata/urlParser';
-import LinkExternal from 'ui/shared/LinkExternal';
+import LinkExternal from 'ui/shared/links/LinkExternal';
 
 import MetadataAccordionItem from './MetadataAccordionItem';
 import MetadataAccordionItemTitle from './MetadataAccordionItemTitle';
@@ -26,6 +26,9 @@ const MetadataItemPrimitive = ({ name, value, isItem = true, isFlat, level }: Pr
         const url = urlParser(value);
         if (url) {
           return <LinkExternal href={ url.toString() }>{ value }</LinkExternal>;
+        }
+        if (value === '') {
+          return <div>&quot;&quot;</div>;
         }
       }
       // eslint-disable-next-line no-fallthrough

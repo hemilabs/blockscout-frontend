@@ -9,7 +9,7 @@ const Blob = dynamic(() => import('ui/pages/Blob'), { ssr: false });
 
 const Page: NextPage<Props> = (props: Props) => {
   return (
-    <PageNextJs pathname="/blobs/[hash]" query={ props }>
+    <PageNextJs pathname="/blobs/[hash]" query={ props.query }>
       <Blob/>
     </PageNextJs>
   );
@@ -17,4 +17,4 @@ const Page: NextPage<Props> = (props: Props) => {
 
 export default Page;
 
-export { base as getServerSideProps } from 'nextjs/getServerSideProps';
+export { dataAvailability as getServerSideProps } from 'nextjs/getServerSideProps';

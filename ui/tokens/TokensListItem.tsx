@@ -5,6 +5,7 @@ import React from 'react';
 import type { TokenInfo } from 'types/api/token';
 
 import config from 'configs/app';
+import { getTokenTypeName } from 'lib/token/tokenTypes';
 import AddressAddToWallet from 'ui/shared/address/AddressAddToWallet';
 import Tag from 'ui/shared/chakra/Tag';
 import AddressEntity from 'ui/shared/entities/address/AddressEntity';
@@ -16,7 +17,7 @@ type Props = {
   index: number;
   page: number;
   isLoading?: boolean;
-}
+};
 
 const PAGE_SIZE = 50;
 
@@ -31,6 +32,7 @@ const TokensTableItem = ({
 
   const {
     address,
+    filecoin_robust_address: filecoinRobustAddress,
     exchange_rate: exchangeRate,
     type,
     holders,
@@ -59,7 +61,7 @@ const TokensTableItem = ({
             fontWeight="700"
           />
           <Flex ml={ 3 } flexShrink={ 0 } columnGap={ 1 }>
-            <Tag isLoading={ isLoading }>{ type }</Tag>
+            <Tag isLoading={ isLoading }>{ getTokenTypeName(type) }</Tag>
             { bridgedChainTag && <Tag isLoading={ isLoading }>{ bridgedChainTag }</Tag> }
           </Flex>
           <Skeleton isLoaded={ !isLoading } fontSize="sm" ml="auto" color="text_secondary" minW="24px" textAlign="right" lineHeight={ 6 }>
@@ -69,7 +71,7 @@ const TokensTableItem = ({
       </Grid>
       <Flex justifyContent="space-between" alignItems="center" width="150px" ml={ 7 } mt={ -2 }>
         <AddressEntity
-          address={{ hash: address }}
+          address={{ hash: address, filecoin: { robust: filecoinRobustAddress } }}
           isLoading={ isLoading }
           truncation="constant"
           noIcon

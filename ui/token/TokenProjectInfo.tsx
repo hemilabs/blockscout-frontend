@@ -1,5 +1,5 @@
 import {
-  Popover, PopoverTrigger, PopoverContent, PopoverBody,
+  PopoverTrigger, PopoverContent, PopoverBody,
   Modal, ModalContent, ModalCloseButton,
   useDisclosure,
 } from '@chakra-ui/react';
@@ -8,6 +8,7 @@ import React from 'react';
 import type { TokenVerifiedInfo } from 'types/api/token';
 
 import useIsMobile from 'lib/hooks/useIsMobile';
+import Popover from 'ui/shared/chakra/Popover';
 
 import Content, { hasContent } from './TokenProjectInfo/Content';
 import TriggerButton from './TokenProjectInfo/TriggerButton';
@@ -27,7 +28,7 @@ const TokenProjectInfo = ({ data }: Props) => {
   if (isMobile) {
     return (
       <>
-        <TriggerButton onClick={ onToggle }/>
+        <TriggerButton onClick={ onToggle } isActive={ isOpen }/>
         <Modal isOpen={ isOpen } onClose={ onClose } size="full">
           <ModalContent>
             <ModalCloseButton/>
@@ -41,7 +42,7 @@ const TokenProjectInfo = ({ data }: Props) => {
   return (
     <Popover isOpen={ isOpen } onClose={ onClose } placement="bottom-start" isLazy>
       <PopoverTrigger>
-        <TriggerButton onClick={ onToggle }/>
+        <TriggerButton onClick={ onToggle } isActive={ isOpen }/>
       </PopoverTrigger>
       <PopoverContent w="500px">
         <PopoverBody px={ 6 } py={ 5 }>

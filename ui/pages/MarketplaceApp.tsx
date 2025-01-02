@@ -1,8 +1,8 @@
-import { Box, Center, useColorMode } from '@chakra-ui/react';
+import { Box, Center, useColorMode, Flex } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { DappscoutIframeProvider, useDappscoutIframe } from 'dappscout-iframe';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import type { MarketplaceAppOverview } from 'types/client/marketplace';
 
@@ -11,6 +11,7 @@ import { route } from 'nextjs-routes';
 import config from 'configs/app';
 import type { ResourceError } from 'lib/api/resources';
 import useApiFetch from 'lib/api/useApiFetch';
+import { useMarketplaceContext } from 'lib/contexts/marketplace';
 import throwOnResourceLoadError from 'lib/errors/throwOnResourceLoadError';
 import useFetch from 'lib/hooks/useFetch';
 import * as metadata from 'lib/metadata';
@@ -20,6 +21,8 @@ import ContentLoader from 'ui/shared/ContentLoader';
 import MarketplaceAppTopBar from '../marketplace/MarketplaceAppTopBar';
 import useAutoConnectWallet from '../marketplace/useAutoConnectWallet';
 import useMarketplaceWallet from '../marketplace/useMarketplaceWallet';
+import useSecurityReports from '../marketplace/useSecurityReports';
+import { getAppUrl } from '../marketplace/utils';
 
 const feature = config.features.marketplace;
 
@@ -34,9 +37,10 @@ type Props = {
   address: string | undefined;
   data: MarketplaceAppOverview | undefined;
   isPending: boolean;
+  appUrl?: string;
 };
 
-const MarketplaceAppContent = ({ address, data, isPending }: Props) => {
+const MarketplaceAppContent = ({ address, data, isPending, appUrl }: Props) => {
   const { iframeRef, isReady } = useDappscoutIframe();
 
   const [ iframeKey, setIframeKey ] = useState(0);
@@ -70,7 +74,7 @@ const MarketplaceAppContent = ({ address, data, isPending }: Props) => {
 
   return (
     <Center
-      h="100vh"
+      flexGrow={ 1 }
       mx={{ base: -4, lg: -6 }}
     >
       { (isFrameLoading) && (
@@ -87,7 +91,7 @@ const MarketplaceAppContent = ({ address, data, isPending }: Props) => {
           h="100%"
           w="100%"
           display={ isFrameLoading ? 'none' : 'block' }
-          src={ data.url }
+          src={ appUrl }
           title={ data.title }
           onLoad={ handleIframeLoad }
         />
@@ -103,6 +107,8 @@ const MarketplaceApp = () => {
   const id = getQueryParamString(router.query.id);
   const { address, sendTransaction, signMessage, signTypedData } = useMarketplaceWallet(id);
   useAutoConnectWallet();
+
+  const { data: securityReports, isLoading: isSecurityReportsLoading } = useSecurityReports();
 
   const query = useQuery<unknown, ResourceError<unknown>, MarketplaceAppOverview>({
     queryKey: [ 'marketplace-dapps', id ],
@@ -126,6 +132,9 @@ const MarketplaceApp = () => {
     enabled: feature.isEnabled,
   });
   const { data, isPending } = query;
+  const { setIsAutoConnectDisabled } = useMarketplaceContext();
+
+  const appUrl = useMemo(() => getAppUrl(data?.url, router), [ data?.url, router ]);
 
   useEffect(() => {
     if (data) {
@@ -133,25 +142,31 @@ const MarketplaceApp = () => {
         { pathname: '/apps/[id]', query: { id: data.id } },
         { app_name: data.title },
       );
+      setIsAutoConnectDisabled(!data.internalWallet);
     }
-  }, [ data ]);
+  }, [ data, setIsAutoConnectDisabled ]);
 
   throwOnResourceLoadError(query);
 
   return (
-    <>
-      <MarketplaceAppTopBar data={ data } isLoading={ isPending } isWalletConnected={ Boolean(address) }/>
+    <Flex flexDirection="column" h="100%">
+      <MarketplaceAppTopBar
+        appId={ id }
+        data={ data }
+        isLoading={ isPending || isSecurityReportsLoading }
+        securityReport={ securityReports?.[id] }
+      />
       <DappscoutIframeProvider
         address={ address }
-        appUrl={ data?.url }
+        appUrl={ appUrl }
         rpcUrl={ config.chain.rpcUrl }
         sendTransaction={ sendTransaction }
         signMessage={ signMessage }
         signTypedData={ signTypedData }
       >
-        <MarketplaceAppContent address={ address } data={ data } isPending={ isPending }/>
+        <MarketplaceAppContent address={ address } data={ data } isPending={ isPending } appUrl={ appUrl }/>
       </DappscoutIframeProvider>
-    </>
+    </Flex>
   );
 };
 

@@ -5,8 +5,8 @@ import type { TimeChartItem, TimeChartItemRaw } from 'ui/shared/chart/types';
 
 import config from 'configs/app';
 import { sortByDateDesc } from 'ui/shared/chart/utils/sorts';
-import * as TokenEntity from 'ui/shared/entities/token/TokenEntity';
 import IconSvg from 'ui/shared/IconSvg';
+import NativeTokenIcon from 'ui/shared/NativeTokenIcon';
 
 const nonNullTailReducer = (result: Array<TimeChartItemRaw>, item: TimeChartItemRaw) => {
   if (item.value === null && result.length === 0) {
@@ -30,7 +30,7 @@ const dailyTxsIndicator: TChainIndicator<'stats_charts_txs'> = {
     resourceName: 'stats_charts_txs',
     dataFn: (response) => ([ {
       items: response.chart_data
-        .map((item) => ({ date: new Date(item.date), value: item.tx_count }))
+        .map((item) => ({ date: new Date(item.date), value: item.transaction_count }))
         .sort(sortByDateDesc)
         .reduceRight(nonNullTailReducer, [] as Array<TimeChartItemRaw>)
         .map(mapNullToZero),
@@ -40,23 +40,15 @@ const dailyTxsIndicator: TChainIndicator<'stats_charts_txs'> = {
   },
 };
 
-const nativeTokenData = {
-  name: config.chain.currency.name || '',
-  icon_url: '',
-  symbol: '',
-  address: '',
-  type: 'ERC-20' as const,
-};
-
 const coinPriceIndicator: TChainIndicator<'stats_charts_market'> = {
   id: 'coin_price',
-  title: `${ config.chain.governanceToken.symbol || config.chain.currency.symbol } price`,
+  title: `${ config.chain.currency.symbol } price`,
   value: (stats) => stats.coin_price === null ?
     '$N/A' :
     '$' + Number(stats.coin_price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }),
   valueDiff: (stats) => stats?.coin_price !== null ? stats?.coin_price_change_percentage : null,
-  icon: <TokenEntity.Icon token={ nativeTokenData } boxSize={ 6 } marginRight={ 0 }/>,
-  hint: `${ config.chain.governanceToken.symbol || config.chain.currency.symbol } token daily price in USD.`,
+  icon: <NativeTokenIcon boxSize={ 6 }/>,
+  hint: `${ config.chain.currency.symbol } token daily price in USD.`,
   api: {
     resourceName: 'stats_charts_market',
     dataFn: (response) => ([ {
@@ -65,7 +57,30 @@ const coinPriceIndicator: TChainIndicator<'stats_charts_market'> = {
         .sort(sortByDateDesc)
         .reduceRight(nonNullTailReducer, [] as Array<TimeChartItemRaw>)
         .map(mapNullToZero),
-      name: `${ config.chain.governanceToken.symbol || config.chain.currency.symbol } price`,
+      name: `${ config.chain.currency.symbol } price`,
+      valueFormatter: (x: number) => '$' + x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }),
+    } ]),
+  },
+};
+
+const secondaryCoinPriceIndicator: TChainIndicator<'stats_charts_secondary_coin_price'> = {
+  id: 'secondary_coin_price',
+  title: `${ config.chain.secondaryCoin.symbol } price`,
+  value: (stats) => !stats.secondary_coin_price || stats.secondary_coin_price === null ?
+    '$N/A' :
+    '$' + Number(stats.secondary_coin_price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }),
+  valueDiff: () => null,
+  icon: <NativeTokenIcon boxSize={ 6 } type="secondary"/>,
+  hint: `${ config.chain.secondaryCoin.symbol } token daily price in USD.`,
+  api: {
+    resourceName: 'stats_charts_secondary_coin_price',
+    dataFn: (response) => ([ {
+      items: response.chart_data
+        .map((item) => ({ date: new Date(item.date), value: item.closing_price }))
+        .sort(sortByDateDesc)
+        .reduceRight(nonNullTailReducer, [] as Array<TimeChartItemRaw>)
+        .map(mapNullToZero),
+      name: `${ config.chain.secondaryCoin.symbol } price`,
       valueFormatter: (x: number) => '$' + x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }),
     } ]),
   },
@@ -115,7 +130,6 @@ const tvlIndicator: TChainIndicator<'stats_charts_market'> = {
     '$N/A' :
     '$' + Number(stats.tvl).toLocaleString(undefined, { maximumFractionDigits: 2, notation: 'compact' }),
   icon: <IconSvg name="lock" boxSize={ 6 } bgColor="#517FDB" borderRadius="base" color="white"/>,
-  // eslint-disable-next-line max-len
   hint: 'Total value of digital assets locked or staked in a chain',
   api: {
     resourceName: 'stats_charts_market',
@@ -138,6 +152,7 @@ const tvlIndicator: TChainIndicator<'stats_charts_market'> = {
 const INDICATORS = [
   dailyTxsIndicator,
   coinPriceIndicator,
+  secondaryCoinPriceIndicator,
   marketPriceIndicator,
   tvlIndicator,
 ];

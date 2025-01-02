@@ -26,7 +26,7 @@ type Props = {
   currentAddress?: string;
   enableTimeIncrement?: boolean;
   isLoading?: boolean;
-}
+};
 
 const TxsTable = ({
   txs,
@@ -43,9 +43,13 @@ const TxsTable = ({
 }: Props) => {
   const { cutRef, renderedItemsNum } = useLazyRenderedList(txs, !isLoading);
 
+  const feeCurrency = config.UI.views.tx.hiddenFields?.fee_currency || config.chain.hasMultipleGasCurrencies ?
+    '' :
+    ' ' + currencyUnits.ether;
+
   return (
     <AddressHighlightProvider>
-      <Table variant="simple" minWidth="950px" size="xs">
+      <Table minWidth="950px">
         <TheadSticky top={ top }>
           <Tr>
             <Th width="54px"></Th>
@@ -68,7 +72,7 @@ const TxsTable = ({
                 <Link onClick={ sort('fee') } display="flex" justifyContent="end">
                   { sorting === 'fee-asc' && <IconSvg boxSize={ 5 } name="arrows/east" transform="rotate(-90deg)"/> }
                   { sorting === 'fee-desc' && <IconSvg boxSize={ 5 } name="arrows/east" transform="rotate(90deg)"/> }
-                  { `Fee${ config.UI.views.tx.hiddenFields?.fee_currency ? '' : ` ${ currencyUnits.ether }` }` }
+                  { `Fee${ feeCurrency }` }
                 </Link>
               </Th>
             ) }

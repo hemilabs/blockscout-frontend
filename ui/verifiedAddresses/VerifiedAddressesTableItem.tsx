@@ -48,6 +48,7 @@ const VerifiedAddressesTableItem = ({ item, application, onAdd, onEdit, isLoadin
     }
 
     const token = {
+      type: 'ERC-20' as const,
       icon_url: application.iconUrl,
       address: application.tokenAddress,
       name: item.metadata.tokenName,
@@ -68,7 +69,7 @@ const VerifiedAddressesTableItem = ({ item, application, onAdd, onEdit, isLoadin
     <Tr>
       <Td>
         <AddressEntity
-          address={{ hash: item.contractAddress, is_contract: true, implementation_name: null }}
+          address={{ hash: item.contractAddress, is_contract: true }}
           isLoading={ isLoading }
           fontWeight="600"
         />
