@@ -1,6 +1,6 @@
 secrets_file="./configs/envs/.env.secrets"
 favicon_folder="./public/assets/favicon/"
-master_url="https://raw.githubusercontent.com/hemilabs/frontend/main/tools/scripts/favicon.svg"
+master_url="https://raw.githubusercontent.com/hemilabs/blockscout-frontend/main/tools/scripts/favicon.svg"
 
 if [ ! -f "$secrets_file" ]; then
   echo "Error: File '$secrets_file' not found."
