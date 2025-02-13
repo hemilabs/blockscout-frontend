@@ -139,8 +139,8 @@ const ContractVerificationFieldSources = ({ fileTypes, multiple, required, title
 
   const validateFileSize = React.useCallback(async(value: FieldPathValue<FormFields, typeof name>): Promise<ValidateResult> => {
     if (Array.isArray(value)) {
-      const FILE_SIZE_LIMIT = 20 * Mb;
-      const errors = value.map(({ size }) => size > FILE_SIZE_LIMIT ? 'File is too big. Maximum size is 20 Mb.' : '');
+      const FILE_SIZE_LIMIT = 50 * Mb;
+      const errors = value.map(({ size }) => size > FILE_SIZE_LIMIT ? 'File is too big. Maximum size is 50 Mb.' : '');
       if (errors.some((item) => item !== '')) {
         return errors.join(';');
       }
