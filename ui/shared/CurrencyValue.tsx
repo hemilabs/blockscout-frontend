@@ -14,7 +14,7 @@ interface Props {
   isLoading?: boolean;
 }
 
-const CurrencyValue = ({ value, currency = '', decimals, exchangeRate, className, accuracy, accuracyUsd, isLoading }: Props) => {
+const CurrencyValue = ({ value, currency = '', decimals, exchangeRate, className, accuracy, accuracyUsd = 2, isLoading }: Props) => {
   if (isLoading) {
     return (
       <Skeleton className={ className } display="inline-block">0.00 ($0.00)</Skeleton>
